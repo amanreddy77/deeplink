@@ -5,6 +5,7 @@ const multer = require('multer');
 const xlsx = require('xlsx');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const config = require('./config');
 
 const app = express();
@@ -51,7 +52,12 @@ const Student = mongoose.model('Student', studentSchema);
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    // Create uploads directory if it doesn't exist
+    const uploadDir = 'uploads/';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);e 
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + '-' + file.originalname);
@@ -94,13 +100,20 @@ function parseFile(filePath, originalName) {
 
 // Upload file and process data
 app.post('/api/upload', upload.single('file'), async (req, res) => {
+  let filePath = null;
+  
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const filePath = req.file.path;
+    filePath = req.file.path;
     const originalName = req.file.originalname;
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(400).json({ error: 'File upload failed - file not found' });
+    }
     
     // Parse the file
     const data = parseFile(filePath, originalName);
@@ -150,6 +163,11 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     
     await Student.insertMany(students);
     
+    // Clean up uploaded file
+    if (filePath && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+    
     res.json({ 
       message: 'File uploaded and processed successfully',
       count: students.length,
@@ -158,6 +176,12 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     
   } catch (error) {
     console.error('Upload error:', error);
+    
+    // Clean up uploaded file on error
+    if (filePath && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+    
     res.status(500).json({ error: error.message });
   }
 });

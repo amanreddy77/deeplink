@@ -60,10 +60,16 @@ Click "Create Web Service" and wait for deployment to complete.
 
 ### Step 3: Set Environment Variables
 In Vercel dashboard, go to Settings → Environment Variables and add:
+
+**🔑 Required Environment Variable:**
 ```
 REACT_APP_API_URL=https://your-render-backend-url.onrender.com
 ```
-**⚠️ Important**: Replace `your-render-backend-url` with your actual Render backend URL (you'll get this after deploying the backend).
+
+**⚠️ Important**: 
+- Replace `your-render-backend-url` with your actual Render backend URL (you'll get this after deploying the backend)
+- The URL should look like: `https://student-grades-backend.onrender.com`
+- Make sure to include `https://` at the beginning
 
 ### Step 4: Deploy
 Click "Deploy" and wait for deployment to complete.
