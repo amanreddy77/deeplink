@@ -32,9 +32,11 @@ This guide will help you deploy the Student Grade Management System to Vercel (f
 In Render dashboard, go to Environment tab and add:
 ```
 NODE_ENV=production
-MONGODB_URI=mongodb+srv://amanreddy77:Psreddy77.@cluster0.2jwxrei.mongodb.net/student-grades?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_URI=your_mongodb_atlas_connection_string_here
 PORT=10000
 ```
+
+**⚠️ Important**: Replace `your_mongodb_atlas_connection_string_here` with your actual MongoDB Atlas connection string from your `.env` file.
 
 ### Step 4: Deploy
 Click "Create Web Service" and wait for deployment to complete.
@@ -61,7 +63,7 @@ In Vercel dashboard, go to Settings → Environment Variables and add:
 ```
 REACT_APP_API_URL=https://your-render-backend-url.onrender.com
 ```
-Replace `your-render-backend-url` with your actual Render backend URL.
+**⚠️ Important**: Replace `your-render-backend-url` with your actual Render backend URL (you'll get this after deploying the backend).
 
 ### Step 4: Deploy
 Click "Deploy" and wait for deployment to complete.
