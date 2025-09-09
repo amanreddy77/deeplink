@@ -137,6 +137,24 @@ function App() {
     setEditForm({ student_name: '', total_marks: '', marks_obtained: '' });
   };
 
+  const handleClearAllData = async () => {
+    if (!window.confirm('Are you sure you want to clear all student data? This action cannot be undone.')) return;
+    
+    try {
+      setLoading(true);
+      setError('');
+      
+      await axios.delete(`${API_BASE_URL}/api/students`);
+      
+      setSuccess('All student data cleared successfully!');
+      await fetchStudents();
+    } catch (err) {
+      setError('Clear data failed: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       fetchStudents(newPage);
@@ -216,10 +234,21 @@ function App() {
         <section className="students-section">
           <div className="section-header">
             <h2>Student Records</h2>
-            <div className="stats">
-              <span>Total Students: {pagination.totalCount}</span>
-              <span>Page {pagination.currentPage} of {pagination.totalPages}</span>
-              <span>Showing {students.length} students</span>
+            <div className="header-actions">
+              <div className="stats">
+                <span>Total Students: {pagination.totalCount}</span>
+                <span>Page {pagination.currentPage} of {pagination.totalPages}</span>
+                <span>Showing {students.length} students</span>
+              </div>
+              {pagination.totalCount > 0 && (
+                <button 
+                  onClick={handleClearAllData}
+                  className="btn btn-clear"
+                  disabled={loading}
+                >
+                  Clear All Data
+                </button>
+              )}
             </div>
           </div>
 

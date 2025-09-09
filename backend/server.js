@@ -57,7 +57,7 @@ const storage = multer.diskStorage({
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
-    cb(null, uploadDir);e 
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + '-' + file.originalname);
@@ -104,7 +104,17 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
   
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+      // If no file uploaded, clear existing data
+      if (mongoose.connection.readyState === 1) {
+        await Student.deleteMany({});
+        return res.json({ 
+          message: 'No file uploaded. All existing data has been cleared.',
+          count: 0,
+          students: []
+        });
+      } else {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
     }
 
     filePath = req.file.path;
@@ -301,6 +311,27 @@ app.get('/api/history', async (req, res) => {
     });
   } catch (error) {
     console.error('Get history error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Clear all student data
+app.delete('/api/students', async (req, res) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        error: 'Database not available. Please ensure MongoDB is running.'
+      });
+    }
+    
+    const result = await Student.deleteMany({});
+    
+    res.json({ 
+      message: 'All student data cleared successfully',
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    console.error('Clear data error:', error);
     res.status(500).json({ error: error.message });
   }
 });
